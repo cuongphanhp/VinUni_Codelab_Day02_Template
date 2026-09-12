@@ -14,8 +14,14 @@ import os
 import sys
 from typing import Any
 
+# Force UTF-8 stdout/stderr so Vietnamese text and emoji don't crash on
+# Windows consoles that default to a legacy codepage (e.g. cp1252).
+if sys.stdout.encoding is None or sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
 # Standard Model Identifier
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 # ===========================================================================
 # 🛡️ Operational Boundaries to Enforce via System Prompt:
