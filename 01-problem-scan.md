@@ -12,7 +12,7 @@
 |---|----------------------------------|------|---------------------|
 | 1 | VinFast | Lặp lại (Repetitive) | Nhân viên đọc và gắn nhãn mức độ nghiêm trọng cho từng phản hồi/khiếu nại lỗi xe gửi qua hotline/app trước khi chuyển kỹ thuật xử lý. |
 | 2 | Xanh SM | Pain từ người khác (Stakeholder Pain) | Phát hiện gian lận cuốc xe ảo (fake trip) — nhân viên soát xét thủ công các cuốc có pattern bất thường, gây thất thoát doanh thu và ảnh hưởng tài xế chân chính. |
-| 3 | Xanh SM | AI-upgrade | Phản ánh khẩn cấp của tài xế (an toàn/tai nạn) đang bị trộn lẫn chung hàng đợi với hỏi đáp thông thường trên kênh hỗ trợ, gây chậm trễ xử lý ca khẩn cấp. |
+| 3 | Xanh SM | AI-upgrade | AI hỗ trợ chung cho tổng đài hỗ trợ tài xế, tiếp nhận và phân luồng mọi yêu cầu vào 2 nhóm case riêng biệt: (a) case khẩn cấp (an toàn/tai nạn) cần phân loại & ưu tiên xử lý ngay, và (b) yêu cầu huỷ cuốc thông thường cần xử lý theo quy trình riêng — hiện cả hai đều do nhân viên trực xử lý thủ công chung một hàng đợi. |
 | 4 | Vinpearl/VinWonders | AI-upgrade | Dự báo lượng khách theo ngày/giờ để điều phối nhân sự tại điểm soát vé — hiện dựa vào kinh nghiệm cá nhân của quản lý ca. |
 | 5 | Vinpearl/VinWonders | AI-upgrade | Trả lời câu hỏi thường gặp (đa ngôn ngữ) của khách quốc tế về giờ mở cửa, giá vé combo đang bị chậm/không nhất quán. |
 
@@ -20,7 +20,7 @@
 
 ## 🃏 Phase 2 — QUICK-ASSESS: 3 Quick Problem Cards
 
-Top 3 lựa chọn từ danh sách SCAN: **#1 (VinFast – Phân loại phản hồi lỗi xe), #2 (Xanh SM – Fake trip), #3 (Xanh SM – Phân luồng khẩn cấp).**
+Top 3 lựa chọn từ danh sách SCAN: **#1 (VinFast – Phân loại phản hồi lỗi xe), #2 (Xanh SM – Fake trip), #3 (Xanh SM – AI hỗ trợ tổng đài tài xế: gồm 2 nhóm case Khẩn cấp & Huỷ cuốc).**
 
 ### Quick Problem Card #1 — VinFast: Phân loại phản hồi lỗi xe
 
@@ -88,35 +88,42 @@ Top 3 lựa chọn từ danh sách SCAN: **#1 (VinFast – Phân loại phản h
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Quick Problem Card #3 — Xanh SM: Phân luồng phản ánh khẩn cấp của tài xế
+### Quick Problem Card #3 — Xanh SM: AI hỗ trợ tổng đài tài xế (2 nhóm case: Khẩn cấp & Huỷ cuốc)
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │ QUICK PROBLEM CARD #3                                        │
 │                                                               │
-│ Bài toán: Phản ánh khẩn cấp (tai nạn/an toàn) của tài xế bị  │
-│ trộn lẫn với hỏi đáp thông thường trong cùng một hàng đợi.   │
+│ Bài toán: Tổng đài hỗ trợ tài xế xử lý chung một hàng đợi    │
+│ cho mọi loại yêu cầu, trong đó có 2 nhóm case tách biệt về   │
+│ bản chất: (a) Case khẩn cấp (an toàn/tai nạn), (b) Yêu cầu   │
+│ huỷ cuốc thông thường — hoàn toàn xử lý thủ công.            │
 │ Công ty thành viên: [x] Xanh SM                              │
 │                                                               │
 │ Ai đang đau (Actor)? Nhân viên trực tổng đài hỗ trợ tài xế;  │
-│ Tài xế gặp sự cố khẩn cấp phải chờ đợi lâu vì xếp hàng FIFO. │
+│ Tài xế gặp sự cố khẩn cấp phải chờ đợi lâu vì xếp hàng FIFO  │
+│ chung với các yêu cầu huỷ cuốc thông thường.                 │
 │                                                               │
 │ Workflow thủ công hiện tại (4 bước):                         │
-│   1. Tài xế gửi tin nhắn vào kênh hỗ trợ chung ──> 2. Nhân   │
+│   1. Tài xế gửi yêu cầu vào kênh hỗ trợ chung ──> 2. Nhân    │
 │   viên đọc lần lượt theo thứ tự đến (FIFO) ──> 3. Xác định   │
-│   mức độ khẩn cấp sau khi đọc ──> 4. Ưu tiên xử lý hoặc xếp  │
-│   lại vào hàng đợi thông thường                              │
+│   case thuộc nhóm nào: (a) Khẩn cấp hay (b) Huỷ cuốc ──>     │
+│   4a. Nếu khẩn cấp: escalate ưu tiên ngay / 4b. Nếu huỷ cuốc:│
+│   xử lý theo quy trình riêng (cập nhật hệ thống, hoàn phí...)│
 │                                                               │
-│ Bước nào tốn thời gian/lỗi nhất? Bước 2-3 (⏱ tin khẩn cấp có │
-│ thể trễ 5-10 phút nếu đến sau nhiều tin hỏi đáp thường)      │
-│ AI có thể nhảy vào hỗ trợ ở bước nào? Bước 2-3 (tự động đọc  │
-│ và phân loại mức độ khẩn cấp ngay khi tin nhắn đến, đẩy lên  │
-│ đầu hàng đợi nếu là ca khẩn cấp)                             │
+│ Bước nào tốn thời gian/lỗi nhất? Bước 2-3 (⏱ case khẩn cấp   │
+│ có thể trễ 5-10 phút nếu đến sau nhiều yêu cầu huỷ cuốc)     │
+│ AI có thể nhảy vào hỗ trợ ở bước nào? Bước 2-3 (tự động phân │
+│ loại case vào đúng nhóm (a)/(b), đẩy case khẩn cấp lên đầu   │
+│ hàng đợi, đồng thời tự xử lý case huỷ cuốc theo policy rõ    │
+│ ràng thuộc nhóm (b))                                         │
 │                                                               │
 │ Đo thành công bằng gì (Metric có số)?                        │
-│   Giảm thời gian phát hiện + phản hồi ca khẩn cấp từ ~7 phút │
-│   ──> dưới 30 giây                                           │
+│   Nhóm (a) Khẩn cấp: giảm thời gian phát hiện + escalate từ  │
+│   ~7 phút ──> dưới 30 giây.                                  │
+│   Nhóm (b) Huỷ cuốc: tự động xử lý ≥70% case không cần con   │
+│   người can thiệp trực tiếp.                                 │
 │                                                               │
-│ Quick Architecture: [ ] No AI  [x] LLM  [ ] Rule  [ ] Agent  │
+│ Quick Architecture: [ ] No AI  [ ] LLM  [ ] Rule  [x] Agent  │
 └─────────────────────────────────────────────────────────────┘
 ```
