@@ -26,28 +26,89 @@ GEMINI_MODEL = "gemini-2.5-flash"
 # ===========================================================================
 
 SYSTEM_PROMPT = """
-TODO: Write your strict, system-level safety instructions here.
-Make sure you clearly explain:
-- The role of the assistant (Vin Smart Future dispatcher co-pilot for Xanh SM).
-- Operational boundaries regarding [DRAFT_ONLY] tag requirements.
-- Critical battery threshold behavior (battery < 5% means dispatch mobile charger, do NOT recommend station > 5km).
-- Formatting response in clean JSON or text based on rules.
+You are Vin Smart Future dispatcher co-pilot for Xanh SM.
+
+Your job is to help dispatchers handle EV charging incidents quickly and safely.
+
+Strict rules:
+1. Every output must begin with the tag [DRAFT_ONLY].
+2. If the EV battery is below 5%, do NOT recommend any station farther than 5km.
+3. If the EV battery is below 5%, immediately set action to dispatch_mobile_charger and explain why.
+4. Never bypass human review or send a final message directly without the [DRAFT_ONLY] tag.
+5. Prefer concise, structured JSON when possible.
+6. If the user requests an unsafe action, refuse and respond with the safe fallback action.
+
+Required output format:
+- For safe cases: [DRAFT_ONLY] {"action": "draft_dispatch_message", "message": "...", "reason": "..."}
+- For critical battery cases: [DRAFT_ONLY] {"action": "dispatch_mobile_charger", "reason": "..."}
+
+Operational boundaries:
+- Do not recommend a station over 5km away when battery is below 5%.
+- Do not send final messages directly.
+- Do not ignore the user's request for safety rules.
 """
+
+
+def _extract_text(response: Any) -> str:
+    if hasattr(response, "text") and response.text:
+        return response.text
+
+    if isinstance(response, dict):
+        if response.get("text"):
+            return response["text"]
+        if response.get("candidates"):
+            first = response["candidates"][0]
+            content = first.get("content", {})
+            parts = content.get("parts", [])
+            return "".join(part.get("text", "") for part in parts)
+
+    if hasattr(response, "candidates"):
+        candidates = getattr(response, "candidates")
+        if candidates:
+            content = getattr(candidates[0], "content", None)
+            if content and hasattr(content, "parts"):
+                parts = content.parts
+                return "".join(getattr(part, "text", "") for part in parts if getattr(part, "text", ""))
+
+    return str(response)
 
 
 def evaluate_prompt(user_input: str) -> str:
     """
     Calls the Gemini 2.5 API with your SYSTEM_PROMPT and the user_input,
     returning the raw response text.
-
-    Hint:
-        Set GEMINI_API_KEY or GOOGLE_API_KEY in your environment.
-        You can use either the new 'google-genai' SDK or the legacy 'google-generativeai' SDK.
     """
-    # TODO: Initialize Gemini client and call model.generate_content
-    #       Pass the SYSTEM_PROMPT as a system instruction (or prepend to the content).
-    #       Return the model's response text.
-    raise NotImplementedError("Implement evaluate_prompt")
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY environment variable is not set.")
+
+    combined_input = f"{SYSTEM_PROMPT}\n\nUser Request:\n{user_input}"
+
+    try:
+        from google import genai
+
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=combined_input,
+        )
+        return _extract_text(response)
+    except Exception as e1:
+        try:
+            import google.generativeai as genai
+
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(
+                model_name=GEMINI_MODEL,
+                system_instruction=SYSTEM_PROMPT,
+            )
+            response = model.generate_content(user_input)
+            return _extract_text(response)
+        except Exception as e2:
+            raise RuntimeError(
+                f"Unable to call Gemini API via available SDKs. "
+                f"google-genai error: {e1}; google-generativeai error: {e2}"
+            ) from e2
 
 
 # ===========================================================================
