@@ -16,7 +16,7 @@
 
 ## ⚠️ AI trả lời sai / hallucination ở đâu?
 
-* **Tự ý sửa vượt phạm vi yêu cầu:** Khi tôi chỉ yêu cầu "hoàn thiện đoạn TODO" trong `prompt_prototype.py`, AI đã tự động thêm một đoạn xử lý encoding UTF-8 và một adversarial test case thứ 3 (kèm logic kiểm tra mới) mà tôi không yêu cầu. Việc này khiến code thay đổi nhiều hơn phạm vi cần thiết và có thể gây khó hiểu khi tôi không chủ động yêu cầu các phần đó.
+* **Tự ý sửa vượt phạm vi yêu cầu:** Khi tôi chỉ yêu cầu "hoàn thiện đoạn Code" trong `prompt_prototype.py`, AI đã tự động thêm một đoạn xử lý encoding UTF-8 và một adversarial test case thứ 3 (kèm logic kiểm tra mới) mà tôi không yêu cầu. Việc này khiến code thay đổi nhiều hơn phạm vi cần thiết và có thể gây khó hiểu khi tôi không chủ động yêu cầu các phần đó.
 * **Ý tưởng ban đầu còn chung chung:** Ở vòng brainstorm đầu tiên cho Phase 1, các bài toán AI đề xuất khá giống với ví dụ mẫu có sẵn (`02-deliverable-example.md`) và chưa đủ "thực tế" theo đúng ý tôi muốn.
 
 ---
